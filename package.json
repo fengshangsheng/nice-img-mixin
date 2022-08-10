@@ -1,0 +1,26 @@
+{
+  "name": "nice-img-mixinWH",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fengshangsheng/nice-img-mixinWH.git"
+  },
+  "keywords": [],
+  "author": "fengshangsheng",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fengshangsheng/nice-img-mixinWH/issues"
+  },
+  "homepage": "https://github.com/fengshangsheng/nice-img-mixinWH#readme",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "image-size": "^1.0.2",
+    "spritesmith": "^3.4.0",
+    "webpack": "^5.74.0"
+  }
+}
