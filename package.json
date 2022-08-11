@@ -1,7 +1,7 @@
 {
   "name": "nice-img-mixin",
-  "version": "1.0.1",
-  "description": "",
+  "version": "1.0.2",
+  "description": "生成精灵/雪碧图插件",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

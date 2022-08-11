@@ -11,6 +11,8 @@ class MixinImgWH {
   outMapDir = ''; // 生成的文件路径
   renderTs = false;
 
+  watcher = undefined;
+
   constructor({resolveDir, outMapDir, renderTs}) {
     this.resolveDir = resolveDir;
     this.outMapDir = outMapDir;
@@ -42,29 +44,30 @@ class MixinImgWH {
     return new Promise(async (resolve, reject) => {
       const promise = []
       for (const sprite in this.resolveDir) {
-        await this.renderSpritesItem(sprite);
+        promise.push(this.renderSpritesItem(sprite));
       }
+      await Promise.all(promise);
       resolve();
     })
   }
 
   async initWatch() {
     // 全部需要解析的目录路径
-    const dirs = Object.keys(this.resolveDir).map((key) => {
-      return path.resolve(this.root, this.resolveDir[key]);
-    })
+    const dirs = Object.keys(this.resolveDir).map((key) => path.resolve(this.root, this.resolveDir[key]))
     // 取消上一次的监听
-    this._watcher && await this._watcher.close();
+    this.watcher && await this.watcher.close();
     // 初始化监听
-    this._watcher = chokidar.watch(dirs, {ignoreInitial: true});
-    this._watcher.on("all", (event, filepath) => {
+    this.watcher = chokidar.watch(dirs, {ignoreInitial: true});
+
+    const _shakeEvent = this.shakeEvent();
+    this.watcher.on("all", (event, filepath) => {
       for (const sprite in this.resolveDir) {
         const dir = path.resolve(this.root, this.resolveDir[sprite]);
 
         if (filepath.indexOf(dir) === 0) {
           // 如果是多个文件夹同时变更，就记录
-          this.loadingRenderItem = [...this.loadingRenderItem || [], sprite]
-          this.shakeEvent(() => {
+          this.loadingRenderItem = [...this.loadingRenderItem || [], sprite];
+          _shakeEvent(() => {
             // 根据记录变更的目录，重新生成相应的精灵图
             for (const item of this.loadingRenderItem) {
               this.renderSpritesItem(item);
@@ -88,11 +91,11 @@ class MixinImgWH {
     })
   }
 
-  shakeEvent(key, event, ms = 5000) {
+  shakeEvent(ms = 5000) {
     let flat = false;
     let timeout = 0;
 
-    return (() => {
+    return (event) => {
       flat && clearTimeout(timeout);
       flat = true;
 
@@ -100,7 +103,7 @@ class MixinImgWH {
         flat = false;
         event();
       }, ms);
-    })();
+    };
   }
 
   findFiles(dirpath) {
@@ -137,18 +140,16 @@ class MixinImgWH {
         _imgMap[path.basename(key)] = res.coordinates[key]
       }
 
-      const _filePath = path.resolve(this.root, this.outMapDir, `sprite.${filename}.config.${this.renderTs ? 'ts' : 'js'}`);
+      const _filePath = path.resolve(this.root, this.outMapDir, `sprite.${filename}.style.${this.renderTs ? 'ts' : 'js'}`);
       const _imgPath = path.resolve(this.root, this.outMapDir, `sprite.${filename}.png`);
       const _type = Object.keys(_imgMap).map((item) => `"${item}"`).join(' | ');
       _imgMap = JSON.stringify(_imgMap, null, 2);
 
       const txt =
-        `export const imgMap = ${_imgMap}`
-        + '\n'
-        + (this.renderTs ? `export type TImgKey = ${_type}` : '')
+        (this.renderTs ? `export type T${filename[0].toLocaleUpperCase() + filename.slice(1)} = ${_type} \n` : '')
+        + `export const ${filename}Style = ${_imgMap}`;
 
-
-      fs.writeFileSync(_filePath, txt, 'utf-8')
+      fs.writeFileSync(_filePath, txt, 'utf-8');
       fs.writeFileSync(_imgPath, res.image);
 
       resolve();
