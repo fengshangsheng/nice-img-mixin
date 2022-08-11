@@ -8,8 +8,8 @@ module.exports = {
   // some code......
   plugins: [
     // some code......
-    new MixinImgWH({
-      // 必填：需要生成精灵图的目录文件
+    new MixinImg({
+      // 必填：需要生成精灵图的目录文件夹路径
       resolveDir: {
         textzz: './src/images/test',
         modalzz: './src/images/modal'

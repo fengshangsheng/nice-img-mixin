@@ -134,19 +134,23 @@ class MixinImgWH {
 
   appendFile(filename, res) {
     return new Promise((resolve, reject) => {
-      let _imgMap = {}
+      const _imgMap = {}
       for (const key in res.coordinates) {
-        _imgMap[path.basename(key)] = res.coordinates[key]
+        const item = res.coordinates[key];
+        _imgMap[path.basename(key)] = {
+          ...item,
+          x: item.x * -1,
+          y: item.y * -1
+        }
       }
 
+      const _type = Object.keys(_imgMap).map((item) => `"${item}"`).join(' | ');
       const _filePath = path.resolve(this.root, this.outMapDir, `sprite.${filename}.style.${this.renderTs ? 'ts' : 'js'}`);
       const _imgPath = path.resolve(this.root, this.outMapDir, `sprite.${filename}.png`);
-      const _type = Object.keys(_imgMap).map((item) => `"${item}"`).join(' | ');
-      _imgMap = JSON.stringify(_imgMap, null, 2);
 
       const txt =
         (this.renderTs ? `export type T${filename[0].toLocaleUpperCase() + filename.slice(1)} = ${_type} \n` : '')
-        + `export const ${filename}Style = ${_imgMap}`;
+        + `export const ${filename}Style = ${JSON.stringify(_imgMap, null, 2)}`;
 
       fs.writeFileSync(_filePath, txt, 'utf-8');
       fs.writeFileSync(_imgPath, res.image);
