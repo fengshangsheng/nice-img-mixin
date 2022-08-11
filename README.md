@@ -2,7 +2,7 @@
 
 ```javascript
 // webpack.config.js
-const MixinImg = require('nice-img-mixinWH');
+const MixinImg = require('nice-img-mixin');
 
 module.exports = {
   // some code......
