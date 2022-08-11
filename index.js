@@ -34,16 +34,17 @@ class MixinImgWH {
 
     // npm run start/dev
     compiler.hooks.watchRun.tapAsync(PluginName, async (compiler, cb) => {
-      await this.initSpritesmith();
+      // 初始化时，执行一次，生成精灵图
+      this.watcher === undefined && await this.initSpritesmith();
       this.initWatch();
       cb();
     })
   }
 
-  initSpritesmith() {
+  initSpritesmith(dirNames = Object.keys(this.resolveDir)) {
     return new Promise(async (resolve, reject) => {
       const promise = []
-      for (const sprite in this.resolveDir) {
+      for (const sprite of dirNames) {
         promise.push(this.renderSpritesItem(sprite));
       }
       await Promise.all(promise);
@@ -69,9 +70,7 @@ class MixinImgWH {
           this.loadingRenderItem = [...this.loadingRenderItem || [], sprite];
           _shakeEvent(() => {
             // 根据记录变更的目录，重新生成相应的精灵图
-            for (const item of this.loadingRenderItem) {
-              this.renderSpritesItem(item);
-            }
+            this.initSpritesmith([...new Set(this.loadingRenderItem)]);
           });
           break;
         }
@@ -91,7 +90,7 @@ class MixinImgWH {
     })
   }
 
-  shakeEvent(ms = 5000) {
+  shakeEvent(ms = 8000) {
     let flat = false;
     let timeout = 0;
 
