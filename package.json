@@ -1,6 +1,6 @@
 {
   "name": "nice-img-mixin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "生成精灵/雪碧图插件",
   "main": "index.js",
   "scripts": {
